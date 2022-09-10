@@ -1,0 +1,74 @@
+Declare PtrSafe Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteA" (ByVal hwnd As Long, ByVal lpOperation As String, ByVal lpFile As String, ByVal lpParameters As String, ByVal lpDirectory As String, ByVal nShowCmd As Long) As Long
+Const SWNORMAL = 1
+
+Sub envioCartera()
+
+Dim Rango As Range
+Dim x
+Dim Mensaje As String
+Dim evaluacion As String
+Dim myDate As Date
+Dim fechaActual As Date
+
+Dim texto As String
+
+
+
+
+
+
+Application.ScreenUpdating = False ' Inabilitar la pantalla lo que hace
+
+For Each Rango In Hoja1.Range("CARTERA[CLIENTE]") 'Nombre de la tabla y columna
+
+texto = Hoja4.Cells(Application.WorksheetFunction.RandBetween(2, 7), 1)
+
+If Not IsEmpty(Rango.Offset(0, 6).Value) And Len(Rango.Offset(0, 6).Value) = 9 Then
+
+
+
+Mensaje = VBA.Replace("whatsapp://send?phone=" & "593" & Rango.Offset(0, 6).Value & "&text=" & _
+"Hola " & Rango.Value & "" & texto & ", si necesita consultar su factura o reportar su pago puede hacerlo al siguiente número: 0999300415", " ", "%20") 'indicativo + número + texto, utilizamos  VBA.Replace para reemplazar los espacios por %20 porque para whatsapp el espacio es %20
+
+
+
+
+
+Hoja2.Select
+
+ActiveSheet.Shapes.Range(Array("Picture 5")).Select
+        
+Selection.Copy
+ 
+x = ShellExecute(hwnd, "Open", Mensaje, &O0, &O0, SWNORMAL)
+
+Call SendKeys("~", True)
+        Application.Wait Now + TimeValue("00:00:04")
+        Call SendKeys("^v", False)
+        Application.Wait Now + TimeValue("00:00:04")
+        Call SendKeys("~", False)
+        
+        Application.CutCopyMode = False
+        
+        Application.Wait Now + TimeValue("00:00:04")
+        
+
+Rango.Offset(0, 7).Value = "¡Enviado!"
+      
+Else
+
+Rango.Offset(0, 7).Value = "¡Numero incorrecto!"
+
+End If
+
+Next Rango
+
+Hoja1.Select
+
+Application.ScreenUpdating = False ' Habilitar la pantalla lo que hace
+
+MsgBox ("Operacion terminada"), vbInformation
+
+
+End Sub
+
